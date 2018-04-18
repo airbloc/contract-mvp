@@ -1,2 +1,4 @@
-# airbloc-contract-poc
-Airbloc Contract Implementation (Proof of Concept)
+Airbloc Contract (Proof-of-Concept)
+=====================
+
+This is the proof-of-concept MVP implementation of Airbloc Service Contract. 
