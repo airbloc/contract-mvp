@@ -1,21 +1,17 @@
 pragma solidity ^0.4.21;
 
 /**
- * AuthRegistry stores personal authorization settings per app.
+ * AppRegistry stores data authorization settings per person.
  */
 contract AuthRegistry {
+    // only store boolean value whether the user authorized Auth rule.
+    mapping(address => mapping(bytes32 => bool[])) private registry;
 
-
-    // AuthRegistry only stores boolean value about the user authorized the data,
-    // 
-    mapping(address => mapping(uint256 => bool)) private registry;
-
-    function register(uint256 ruleId, bool authorized) public {
-        registry[msg.sender][ruleId] = Auth(authorized);
+    function register(bytes32 ruleId, bool[] authorizations) public {
+        registry[msg.sender][ruleId] = authorizations;
     }
 
-    function isAuthorized(uint256 ruleId) public view returns (bool) {
-        var auth = registry[msg.sender][ruleId];
-        return auth.authorized;
+    function getAuthorizations(bytes32 ruleId) public view returns (bool[]) {
+        return registry[msg.sender][ruleId];
     }
 }
