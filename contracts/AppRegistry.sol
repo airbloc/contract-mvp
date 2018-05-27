@@ -39,7 +39,7 @@ contract AppRegistry is TokenRiskStakable {
 
     /**
      */
-    function addUser(bytes32 addedUserIds) public {
+    function addUser(bytes32[] addedUserIds) public {
         var app = apps[msg.sender];
         require(app);
         require(getMyStake() >= getRequiredStake(app.userCount + addedUserIds.length));
@@ -50,7 +50,7 @@ contract AppRegistry is TokenRiskStakable {
         app.userCount = app.userCount.add(addedUserIds.length);
     }
 
-    function removeUser(bytes32 removedUserIds) public {
+    function removeUser(bytes32[] removedUserIds) public {
         require(apps[msg.sender]);
         var app = apps[msg.sender];
 
