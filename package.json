@@ -8,10 +8,16 @@
     },
     "scripts": {
         "lint": "solium --watch --dir contracts",
-        "ganache-run": "docker run --name ganache -d -p 8545:8545 trufflesuite/ganache-cli -a 50 -e 500",
+        "ganache-run": "docker run --name ganache -d -p 8545:8545 trufflesuite/ganache-cli -a 50",
         "ganache-stop": "docker rm -f ganache",
-        "test": "npm run ganache-run; truffle test --disable-unused-var-warning; npm run ganache-stop",
-        "migrate": "truffle migrate --reset",
+        "export": "npm run ganache-run; truffle export abi; npm run ganache-stop",
+        "test": "npm run ganache-run; truffle test; npm run ganache-stop",
+        "test:ropsten": "truffle test --network ropsten",
+        "test:rinkeby": "truffle test --network rinkeby",
+        "migrate": "npm run ganache-run; truffle migrate --network development --reset; npm run ganache-stop;",
+        "migrate:ropsten": "truffle migrate --network ropsten --reset",
+        "migrate:rinkeby": "truffle migrate --network rinkeby --reset",
+        "migrate:mainnet": "truffle migrate --network mainnet --reset",
         "console": "npm run ganache-run; npm run migrate; truffle console; npm run ganache-stop"
     },
     "repository": {
@@ -23,9 +29,11 @@
     "license": "MIT",
     "bugs": {
         "url": "https://github.com/airbloc/contract-poc/issues"
-      },
+    },
     "homepage": "https://github.com/airbloc/contract-poc#readme",
-    "dependencies": {},
+    "dependencies": {
+        "openzeppelin-solidity": "git+https://github.com/OpenZeppelin/openzeppelin-solidity.git"
+      },
     "devDependencies": {
         "babel-polyfill": "^6.26.0",
         "babel-preset-es2015": "^6.24.1",
@@ -35,6 +43,9 @@
         "chai": "^4.1.2",
         "chai-as-promised": "^7.1.1",
         "chai-bignumber": "^2.0.2",
-        "solium": "^1.1.6"
+        "solium": "^1.1.7",
+        "truffle-hdwallet-provider": "0.0.3",
+        "truffle-hdwallet-provider-privkey": "git+https://github.com/rhlsthrm/truffle-hdwallet-provider-privkey.git",
+        "truffle-ledger-provider": "0.0.1"
     }
 }
