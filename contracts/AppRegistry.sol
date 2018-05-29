@@ -52,7 +52,7 @@ contract AppRegistry is TokenRiskStakable {
 
     function removeUser(bytes32[] removedUserIds) public {
         require(apps[msg.sender]);
-        var app = apps[msg.sender];
+        App app = apps[msg.sender];
 
         for (uint32 i = 0; i < removedUserIds.length; i++) {
             app.userIds[removedUserIds[i]] = false;

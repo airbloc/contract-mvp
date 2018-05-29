@@ -1,14 +1,14 @@
 pragma solidity ^0.4.21;
 
-import "openzeppelin-solidity/contracts/token/math/SafeMath.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
 import "openzeppelin-solidity/contracts/ownership/rbac/RBAC.sol";
 
 /**
- * Upgradable Token Stake Registry.
+ * Upgradable Token Lock Registry.
  */
-contract TokenStakable is RBAC {
+contract TokenLockRegistry is RBAC {
     using SafeMath for uint256;
     using SafeERC20 for ERC20;
 
@@ -23,10 +23,10 @@ contract TokenStakable is RBAC {
     }
 
     /**
-     * Unstake the token you locked up.
-     * @param amount {uint256} you want to unstake
+     * Stake and lock your token.
+     * @param amount you want to stake
      */
-    function stake(uint256 amountToStake) public {
+    function deposit(uint256 amountToStake) public {
         require(token.allowance(msg.sender, address(this)) >= amountToStake);
         require(token.balanceOf(msg.sender) >= amountToStake);
 
@@ -35,17 +35,21 @@ contract TokenStakable is RBAC {
     }
 
     /**
-     * Unstake the token you locked up.
+     * Withdraw the token you locked up.
      * @param amount {uint256} you want to unstake
      */
-    function unstake(uint256 amount) public {
+    function withdraw(uint256 amount) public {
         require(amount <= getMyStake());
 
         lockedBalanceOf[msg.sender] = lockedBalanceOf[msg.sender].sub(amount);
         token.safeTransfer(msg.sender, amount);
     }
 
-    function getMyStake() public view returns (uint256 balance) {
-        return lockedBalanceOf[msg.sender];
+    /**
+     * Returns someone's balance. ERC20 Compatible interface.
+     * @param addr 
+     */
+    function balanceOf(address addr) public view returns (uint256) {
+        return lockedBalanceOf[addr];
     }
 }
