@@ -40,17 +40,16 @@ contract TokenLockRegistry is RBAC {
      */
     function withdraw(uint256 amount) public {
         require(0 < amount);
-        require(amount <= balanceOf(msg.sender));
+        require(amount <= stakeOf(msg.sender));
 
         lockedBalanceOf[msg.sender] = lockedBalanceOf[msg.sender].sub(amount);
         token.safeTransfer(msg.sender, amount);
     }
 
     /**
-     * Returns someone's balance. ERC20 Compatible interface.
      * @param addr 
      */
-    function balanceOf(address addr) public view returns (uint256) {
+    function stakeOf(address addr) public view returns (uint256) {
         return lockedBalanceOf[addr];
     }
 }

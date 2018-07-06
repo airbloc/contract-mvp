@@ -21,25 +21,24 @@ contract RiskTokenLockRegistry is TokenLockRegistry {
     // address that losed token stakes will sent.
     address public penaltyBeneficiary;
 
-    constructor(ERC20 token, address _penaltyBeneficiary) TokenLockRegistry(token) {
+    constructor(ERC20 token, address _penaltyBeneficiary, address punisher) TokenLockRegistry(token) {
         require(penaltyBeneficiary != address(0x0));
         penaltyBeneficiary = _penaltyBeneficiary;
-
-        addRole(msg.sender, ROLE_PUNISHER);
+        addRole(punisher, ROLE_PUNISHER);
     }
 
     modifier onlyPunisher() { checkRole(msg.sender, ROLE_PUNISHER); _; }
 
     /**
-     * 
+     * Add punisher contract who can slash someone's stake. 
      */
     function addPunisher(address punisher) external onlyPunisher {
-        // require(punisher.isContract());  // ONLY CONTRACT can be punisher.
+        require(punisher.isContract());  // ONLY CONTRACT can be punisher.
         addRole(punisher, ROLE_PUNISHER);
     }
     
     /**
-     * Punish someone by lose his/her stake.
+     * Punish someone by slashing his/her stake.
      */
     function punish(address victim, uint256 loseAmount) public onlyPunisher {
         require(lockedBalanceOf[victim] >= loseAmount);
