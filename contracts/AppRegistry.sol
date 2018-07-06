@@ -1,6 +1,6 @@
 pragma solidity ^0.4.21;
 
-import "./TokenRiskStakable.sol";
+import "./RiskTokenLockRegistry.sol";
 
 /**
  * AppRegistry stores an app information, and user IDs of the app.
@@ -9,15 +9,15 @@ import "./TokenRiskStakable.sol";
  * If an app did some bad things that prohibited by Airbloc Protocol's Law,
  * then there's a risk for app can LOSE some amount of it's stake.
  */
-contract AppRegistry is TokenRiskStakable {
+contract AppRegistry is RiskTokenLockRegistry {
     using SafeMath for uint32;
 
     // Basic App info for minimum proof. Rest of the data is available on off-chain.
-    // TODO: Use Cryptographic Accumulator (ex: PMT, MMR...) for privacy, instead of using Set.
+    // TODO: Privacy considerations
     struct App {
         bytes32 id;
         uint32 userCount;
-        mapping(bytes32 => bool) userIds;
+        mapping(address => bool) users;
     }
 
     mapping(address => App) public apps;
@@ -27,7 +27,7 @@ contract AppRegistry is TokenRiskStakable {
      * @param penaltyBeneficiary The destination wallet that stake losses are transferred to.  
      */
     constructor(ERC20 token, address penaltyBeneficiary) 
-        TokenRiskStakable(token, penaltyBeneficiary) {
+        RiskTokenLockRegistry(token, penaltyBeneficiary) {
     }
 
     /**
@@ -39,37 +39,37 @@ contract AppRegistry is TokenRiskStakable {
 
     /**
      */
-    function addUser(bytes32[] addedUserIds) public {
-        var app = apps[msg.sender];
+    function addUser(address[] addedUsers) public {
+        App app = apps[msg.sender];
         require(app);
-        require(getMyStake() >= getRequiredStake(app.userCount + addedUserIds.length));
+        require(balanceOf(msg.sender) >= getRequiredStake(app.userCount + addedusers.length));
 
-        for (uint32 i = 0; i < addedUserIds.length; i++) {
-            app.userIds[addedUserIds[i]] = true;
+        for (uint32 i = 0; i < addedUsers.length; i++) {
+            app.users[addedUsers[i]] = true;
         }
-        app.userCount = app.userCount.add(addedUserIds.length);
+        app.userCount = app.userCount.add(addedUsers.length);
     }
 
-    function removeUser(bytes32[] removedUserIds) public {
+    function removeUser(address[] removedUsers) public {
         require(apps[msg.sender]);
         App app = apps[msg.sender];
 
-        for (uint32 i = 0; i < removedUserIds.length; i++) {
-            app.userIds[removedUserIds[i]] = false;
+        for (uint32 i = 0; i < removedUsers.length; i++) {
+            app.users[removedUsers[i]] = false;
         }
-        app.userCount = app.userCount.sub(removedUserIds.length);
+        app.userCount = app.userCount.sub(removedUsers.length);
     }
 
     function unstake(uint256 amount) public {
-        require(getMyStake() - amount >= getRequireStake(apps[msg.sender].userCount));
+        require(balanceOf(msg.sender) - amount >= getRequiredStake(apps[msg.sender].userCount));
         super.unstake(amount);
     }
 
-    function hasUser(bytes32 appId, bytes32 userId) public view returns (bool) {
-        return apps[appId].userIds[userId];
+    function hasUser(bytes32 appId, address user) public view returns (bool) {
+        return apps[appId].users[user];
     }
 
-    function getRequiredStake(uint32 userCount) public pure returns (unit256 amount) {
+    function getRequiredStake(uint32 userCount) public pure returns (uint256 amount) {
         return userCount;
     }
 }
