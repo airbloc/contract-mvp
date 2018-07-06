@@ -18,13 +18,13 @@ contract TokenLockRegistry is RBAC {
     // amount of locked ERC20 balances per user 
     mapping(address => uint256) public lockedBalanceOf;
 
-    constructor(ERC20 _token) {
+    constructor(ERC20 _token) public {
         token = _token;
     }
 
     /**
      * Stake and lock your token.
-     * @param amount you want to stake
+     * @param amountToStake you want to stake
      */
     function deposit(uint256 amountToStake) public {
         require(token.allowance(msg.sender, address(this)) >= amountToStake);
@@ -45,9 +45,6 @@ contract TokenLockRegistry is RBAC {
         token.safeTransfer(msg.sender, amount);
     }
 
-    /**
-     * @param addr 
-     */
     function stakeOf(address addr) public view returns (uint256) {
         return lockedBalanceOf[addr];
     }

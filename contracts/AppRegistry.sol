@@ -1,5 +1,6 @@
 pragma solidity ^0.4.21;
 
+import "openzeppelin-solidity/contracts/examples/SimpleToken.sol";
 import "./RiskTokenLockRegistry.sol";
 
 /**
@@ -10,7 +11,7 @@ import "./RiskTokenLockRegistry.sol";
  * then there's a risk for app can LOSE some amount of it's stake.
  */
 contract AppRegistry is RiskTokenLockRegistry {
-    using SafeMath for uint32;
+    using SafeMath for uint256;
 
     // Basic App info for minimum proof. Rest of the data is available on off-chain.
     // TODO: Privacy considerations
@@ -23,12 +24,16 @@ contract AppRegistry is RiskTokenLockRegistry {
     mapping(address => App) public apps;
     mapping(bytes32 => address) public addressOf;
 
+    event AppRegister(bytes32 appId, address appAddress);
+ 
     /**
      * @param token The address of token for stake.
      * @param penaltyBeneficiary The destination wallet that stake losses are transferred to.  
      */
     constructor(ERC20 token, address penaltyBeneficiary, address punisher) 
-        RiskTokenLockRegistry(token, penaltyBeneficiary, punisher) {
+        RiskTokenLockRegistry(token, penaltyBeneficiary, punisher)
+        public
+    {
     }
 
     /**
@@ -37,33 +42,38 @@ contract AppRegistry is RiskTokenLockRegistry {
     function register(bytes32 appId) public {
         apps[msg.sender] = App(appId, 0);
         addressOf[appId] = msg.sender;
+        emit AppRegister(appId, msg.sender);
     }
 
     /**
+     * Add user to app.
      */
     function addUser(address[] addedUsers) public {
-        require(hasAppOf(msg.sender));
-        require(stakeOf(msg.sender) >= getRequiredStake(apps[msg.sender].userCount + addedUsers.length));
+        require(hasAppOf(msg.sender), "App not found.");
+        require(
+            stakeOf(msg.sender) >= getRequiredStake(apps[msg.sender].userCount + addedUsers.length),
+            "Insufficient stake amount."
+        );
         App app = apps[msg.sender];
 
-        for (uint32 i = 0; i < addedUsers.length; i++) {
+        for (uint256 i = 0; i < addedUsers.length; i++) {
             app.users[addedUsers[i]] = true;
         }
         app.userCount = app.userCount.add(addedUsers.length);
     }
 
     function removeUser(address[] removedUsers) public {
-        require(hasAppOf(msg.sender));
+        require(hasAppOf(msg.sender), "App not found.");
         App app = apps[msg.sender];
 
-        for (uint32 i = 0; i < removedUsers.length; i++) {
+        for (uint256 i = 0; i < removedUsers.length; i++) {
             app.users[removedUsers[i]] = false;
         }
         app.userCount = app.userCount.sub(removedUsers.length);
     }
 
     function withdraw(uint256 amount) public {
-        require(hasAppOf(msg.sender));
+        require(hasAppOf(msg.sender), "App not found.");
         require(stakeOf(msg.sender) - amount >= getRequiredStake(apps[msg.sender].userCount));
         super.withdraw(amount);
     }

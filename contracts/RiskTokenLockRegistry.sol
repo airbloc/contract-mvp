@@ -21,8 +21,11 @@ contract RiskTokenLockRegistry is TokenLockRegistry {
     // address that losed token stakes will sent.
     address public penaltyBeneficiary;
 
-    constructor(ERC20 token, address _penaltyBeneficiary, address punisher) TokenLockRegistry(token) {
-        require(penaltyBeneficiary != address(0x0));
+    constructor(ERC20 token, address _penaltyBeneficiary, address punisher) 
+        TokenLockRegistry(token)
+        public 
+    {
+        require(_penaltyBeneficiary != address(0x0));
         penaltyBeneficiary = _penaltyBeneficiary;
         addRole(punisher, ROLE_PUNISHER);
     }
