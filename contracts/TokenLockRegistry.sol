@@ -39,7 +39,6 @@ contract TokenLockRegistry is RBAC {
      * @param amount {uint256} you want to unstake
      */
     function withdraw(uint256 amount) public {
-        require(0 < amount);
         require(amount <= stakeOf(msg.sender));
 
         lockedBalanceOf[msg.sender] = lockedBalanceOf[msg.sender].sub(amount);
